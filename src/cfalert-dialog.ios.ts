@@ -1,6 +1,6 @@
-import * as frame from 'tns-core-modules/ui/frame';
-import { Color } from 'tns-core-modules/color';
-import { ios } from 'tns-core-modules/ui/utils';
+import * as frame from "@nativescript/core/ui/frame";
+import { Color } from "@nativescript/core";
+import { ios } from "@nativescript/core/ui/utils";
 
 declare const CFAlertViewController;
 declare const CFAlertAction;
@@ -62,9 +62,9 @@ export interface DialogOptions {
 
 const DEFAULT_DIALOG_OPTIONS: DialogOptions = {
   dialogStyle: CFAlertStyle.ALERT,
-  title: '',
-  titleColor: 'black',
-  messageColor: 'black',
+  title: "",
+  titleColor: "black",
+  messageColor: "black",
   cancellable: true,
 };
 
@@ -76,49 +76,64 @@ export class CFAlertDialog {
     options.titleColor = new Color(options.titleColor).ios;
     options.messageColor = new Color(options.messageColor).ios;
 
-    if (typeof options.textAlignment === undefined) options.textAlignment = CFAlertGravity.START;
+    if (typeof options.textAlignment === undefined)
+      options.textAlignment = CFAlertGravity.START;
 
     const viewController = frame.topmost().currentPage.ios;
 
     return new Promise((resolve, _) => {
-      if (options.simpleList || options.singleChoiceList || options.multiChoiceList) {
-        alert('Lists are not available on iOS.');
-        resolve('Lists are not available on iOS.');
+      if (
+        options.simpleList ||
+        options.singleChoiceList ||
+        options.multiChoiceList
+      ) {
+        alert("Lists are not available on iOS.");
+        resolve("Lists are not available on iOS.");
         return;
       }
-      this._alertController = CFAlertViewController.alloc().initWithTitleTitleColorMessageMessageColorTextAlignmentPreferredStyleHeaderViewFooterViewDidDismissAlertHandler(
-        options.title,
-        options.titleColor,
-        options.message,
-        options.messageColor,
-        options.textAlignment,
-        options.dialogStyle,
-        options.headerView,
-        options.footerView,
-        () => {
-          if (options.onDismiss) options.onDismiss();
-          resolve();
-        }
-      );
-  
+      this._alertController =
+        CFAlertViewController.alloc().initWithTitleTitleColorMessageMessageColorTextAlignmentPreferredStyleHeaderViewFooterViewDidDismissAlertHandler(
+          options.title,
+          options.titleColor,
+          options.message,
+          options.messageColor,
+          options.textAlignment,
+          options.dialogStyle,
+          options.headerView,
+          options.footerView,
+          () => {
+            if (options.onDismiss) options.onDismiss();
+            resolve(undefined);
+          }
+        );
+
       this._alertController.shouldDismissOnBackgroundTap = options.cancellable;
       this._alertController.backgroundStyle = options.backgroundBlur
         ? CFAlertControllerBackgroundStyle.Blur
         : CFAlertControllerBackgroundStyle.Plain;
-  
+
       if (options.backgroundColor)
-        this._alertController.backgroundColor = new Color(options.backgroundColor).ios;
-  
+        this._alertController.backgroundColor = new Color(
+          options.backgroundColor
+        ).ios;
+
       this._addActions(options.buttons, resolve);
-  
-      viewController.presentViewControllerAnimatedCompletion(this._alertController, true, null);
+
+      viewController.presentViewControllerAnimatedCompletion(
+        this._alertController,
+        true,
+        null
+      );
     });
   }
 
   public dismiss(animated: boolean) {
     if (!this._alertController) return;
     try {
-      this._alertController.dismissAlertWithAnimationCompletion(animated, () => {});
+      this._alertController.dismissAlertWithAnimationCompletion(
+        animated,
+        () => {}
+      );
     } catch (e) {}
   }
 
@@ -127,21 +142,25 @@ export class CFAlertDialog {
    */
 
   private _addActions(buttons = [], resolve) {
-    buttons.forEach(btnOpts => {
-      if (!btnOpts.buttonAlignment) btnOpts.buttonAlignment = CFAlertActionAlignment.JUSTIFIED;
-      if (btnOpts.textColor) btnOpts.textColor = new Color(btnOpts.textColor).ios;
-      if (btnOpts.backgroundColor) btnOpts.backgroundColor = new Color(btnOpts.backgroundColor).ios;
-      const btn = CFAlertAction.alloc().initWithTitleStyleAlignmentBackgroundColorTextColorHandler(
-        btnOpts.text,
-        btnOpts.buttonStyle,
-        btnOpts.buttonAlignment,
-        btnOpts.backgroundColor,
-        btnOpts.textColor,
-        action => {
-          btnOpts.onClick(action.title)
-          resolve(action.title);
-        }
-      );
+    buttons.forEach((btnOpts) => {
+      if (!btnOpts.buttonAlignment)
+        btnOpts.buttonAlignment = CFAlertActionAlignment.JUSTIFIED;
+      if (btnOpts.textColor)
+        btnOpts.textColor = new Color(btnOpts.textColor).ios;
+      if (btnOpts.backgroundColor)
+        btnOpts.backgroundColor = new Color(btnOpts.backgroundColor).ios;
+      const btn =
+        CFAlertAction.alloc().initWithTitleStyleAlignmentBackgroundColorTextColorHandler(
+          btnOpts.text,
+          btnOpts.buttonStyle,
+          btnOpts.buttonAlignment,
+          btnOpts.backgroundColor,
+          btnOpts.textColor,
+          (action) => {
+            btnOpts.onClick(action.title);
+            resolve(action.title);
+          }
+        );
       this._alertController.addAction(btn);
     });
   }

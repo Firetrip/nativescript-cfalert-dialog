@@ -1,5 +1,5 @@
-import * as app from 'tns-core-modules/application';
-import { Color } from 'tns-core-modules/color';
+import * as app from "@nativescript/core";
+import { Color } from "@nativescript/core";
 
 export enum CFAlertStyle {
   NOTIFICATION = 0,
@@ -70,28 +70,37 @@ declare const com: any;
 declare const android: any;
 const Builder = com.crowdfire.cfalertdialog.CFAlertDialog.Builder;
 
-const notificationStyle = com.crowdfire.cfalertdialog.CFAlertDialog.CFAlertStyle.NOTIFICATION;
+const notificationStyle =
+  com.crowdfire.cfalertdialog.CFAlertDialog.CFAlertStyle.NOTIFICATION;
 const alertStyle = com.crowdfire.cfalertdialog.CFAlertDialog.CFAlertStyle.ALERT;
-const bottomSheetStyle = com.crowdfire.cfalertdialog.CFAlertDialog.CFAlertStyle.BOTTOM_SHEET;
+const bottomSheetStyle =
+  com.crowdfire.cfalertdialog.CFAlertDialog.CFAlertStyle.BOTTOM_SHEET;
 const styles = [notificationStyle, alertStyle, bottomSheetStyle];
 
-const actionDefault = com.crowdfire.cfalertdialog.CFAlertDialog.CFAlertActionStyle.DEFAULT;
-const actionNegative = com.crowdfire.cfalertdialog.CFAlertDialog.CFAlertActionStyle.NEGATIVE;
-const actionPositive = com.crowdfire.cfalertdialog.CFAlertDialog.CFAlertActionStyle.POSITIVE;
+const actionDefault =
+  com.crowdfire.cfalertdialog.CFAlertDialog.CFAlertActionStyle.DEFAULT;
+const actionNegative =
+  com.crowdfire.cfalertdialog.CFAlertDialog.CFAlertActionStyle.NEGATIVE;
+const actionPositive =
+  com.crowdfire.cfalertdialog.CFAlertDialog.CFAlertActionStyle.POSITIVE;
 const actionStyles = [actionDefault, actionNegative, actionPositive];
 
-const alignStart = com.crowdfire.cfalertdialog.CFAlertDialog.CFAlertActionAlignment.START;
-const alignEnd = com.crowdfire.cfalertdialog.CFAlertDialog.CFAlertActionAlignment.END;
-const alignCenter = com.crowdfire.cfalertdialog.CFAlertDialog.CFAlertActionAlignment.CENTER;
-const alignJustified = com.crowdfire.cfalertdialog.CFAlertDialog.CFAlertActionAlignment.JUSTIFIED;
+const alignStart =
+  com.crowdfire.cfalertdialog.CFAlertDialog.CFAlertActionAlignment.START;
+const alignEnd =
+  com.crowdfire.cfalertdialog.CFAlertDialog.CFAlertActionAlignment.END;
+const alignCenter =
+  com.crowdfire.cfalertdialog.CFAlertDialog.CFAlertActionAlignment.CENTER;
+const alignJustified =
+  com.crowdfire.cfalertdialog.CFAlertDialog.CFAlertActionAlignment.JUSTIFIED;
 const alignment = [alignStart, alignEnd, alignCenter, alignJustified];
 
 const gravityStart = android.view.Gravity.START;
 const gravityCenterHorizontal = android.view.Gravity.CENTER_HORIZONTAL;
 const gravityEnd = android.view.Gravity.END;
 const gravity = [gravityStart, gravityCenterHorizontal, gravityEnd];
-
-class Listener implements android.content.DialogInterface.OnClickListener {
+@NativeClass()
+class Listener extends android.content.DialogInterface.OnClickListener {
   public onClick(dialog, which) {
     dialog.dismiss();
   }
@@ -108,7 +117,7 @@ export class CFAlertDialog {
   public show(options: DialogOptions) {
     options = Object.assign({}, DEFAULT_DIALOG_OPTIONS, options);
 
-    const builder = new Builder(app.android.foregroundActivity);
+    const builder = new Builder(app.Application.android.foregroundActivity);
 
     if (typeof options.dialogStyle !== undefined) {
       builder.setDialogStyle(styles[options.dialogStyle]);
@@ -116,10 +125,12 @@ export class CFAlertDialog {
 
     if (options.title) builder.setTitle(options.title);
     if (options.message) builder.setMessage(options.message);
-    if (options.textAlignment !== undefined) builder.setTextGravity(gravity[options.textAlignment]);
+    if (options.textAlignment !== undefined)
+      builder.setTextGravity(gravity[options.textAlignment]);
     if (options.backgroundColor)
       builder.setBackgroundColor(new Color(options.backgroundColor).android);
-    if (options.textColor) builder.setTextColor(new Color(options.textColor).android);
+    if (options.textColor)
+      builder.setTextColor(new Color(options.textColor).android);
 
     builder.setCancelable(options.cancellable);
 
@@ -128,11 +139,13 @@ export class CFAlertDialog {
 
     return new Promise((resolve, _) => {
       if (options.buttons) {
-        options.buttons.forEach(button => {
+        options.buttons.forEach((button) => {
           builder.addButton(
             button.text,
             button.textColor ? new Color(button.textColor).android : -1,
-            button.backgroundColor ? new Color(button.backgroundColor).android : -1,
+            button.backgroundColor
+              ? new Color(button.backgroundColor).android
+              : -1,
             actionStyles[button.buttonStyle],
             alignment[button.buttonAlignment],
             new android.content.DialogInterface.OnClickListener({
@@ -145,7 +158,7 @@ export class CFAlertDialog {
           );
         });
       }
-  
+
       // this._buildSimpleList()
       if (options.simpleList) {
         builder.setItems(
@@ -158,7 +171,7 @@ export class CFAlertDialog {
           })
         );
       }
-  
+
       if (options.singleChoiceList) {
         builder.setSingleChoiceItems(
           options.singleChoiceList.items,
@@ -170,7 +183,7 @@ export class CFAlertDialog {
           })
         );
       }
-  
+
       if (options.multiChoiceList) {
         builder.setMultiChoiceItems(
           options.multiChoiceList.items,
@@ -182,21 +195,23 @@ export class CFAlertDialog {
           })
         );
       }
-  
+
       this._alertDialog = builder.show();
-  
+
       if (options.titleColor) {
         this._alertDialog.setTitleColor(new Color(options.titleColor).android);
       }
       if (options.messageColor) {
-        this._alertDialog.setMessageColor(new Color(options.messageColor).android);
+        this._alertDialog.setMessageColor(
+          new Color(options.messageColor).android
+        );
       }
       if (options.onDismiss) {
         this._alertDialog.setOnDismissListener(
           new android.content.DialogInterface.OnDismissListener({
             onDismiss: () => {
               options.onDismiss();
-              resolve();
+              resolve(undefined);
             },
           })
         );
